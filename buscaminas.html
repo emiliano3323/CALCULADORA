@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Buscaminas</title>
   <style>
     body {
@@ -9,37 +10,40 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: start;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       background-color: #f5f5f5;
     }
     h1 {
       margin: 10px 0;
+      font-size: 1.5rem;
     }
     #board {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       gap: 4px;
       width: 100%;
-      max-width: 320px;
+      max-width: 360px;
     }
     .cell {
-      width: 100%;
-      aspect-ratio: 1 / 1;
       background: #ccc;
       border: none;
       font-size: 1.2rem;
       text-align: center;
-      line-height: 1;
+      aspect-ratio: 1 / 1;
       padding: 0;
+      border-radius: 4px;
+      user-select: none;
     }
     .cell.revealed {
       background: #eee;
     }
+    .cell.flagged {
+      background: #ffeb3b;
+    }
     .back-button {
       margin-top: 15px;
-      padding: 8px 15px;
+      padding: 10px 20px;
       font-size: 1rem;
     }
   </style>
@@ -61,7 +65,22 @@
         const cell = document.createElement("button");
         cell.classList.add("cell");
         cell.dataset.index = i;
-        cell.onclick = () => reveal(i);
+        cell.dataset.revealed = "false";
+        cell.dataset.flagged = "false";
+        let timer;
+
+        cell.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          timer = setTimeout(() => toggleFlag(i), 500);
+        });
+
+        cell.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          clearTimeout(timer);
+        });
+
+        cell.addEventListener("click", () => reveal(i));
+
         cells.push(cell);
         board.appendChild(cell);
       }
@@ -79,16 +98,32 @@
 
     function reveal(index) {
       const cell = cells[index];
-      if (cell.classList.contains("revealed")) return;
+      if (cell.dataset.revealed === "true" || cell.dataset.flagged === "true") return;
 
       cell.classList.add("revealed");
+      cell.dataset.revealed = "true";
 
       if (cell.dataset.mine === "true") {
         cell.textContent = "💣";
-        alert("¡Perdiste!");
-        createBoard(); // reinicia
+        alert("💥 ¡Perdiste!");
+        createBoard();
       } else {
         cell.textContent = "";
+      }
+    }
+
+    function toggleFlag(index) {
+      const cell = cells[index];
+      if (cell.dataset.revealed === "true") return;
+
+      if (cell.dataset.flagged === "false") {
+        cell.textContent = "🚩";
+        cell.dataset.flagged = "true";
+        cell.classList.add("flagged");
+      } else {
+        cell.textContent = "";
+        cell.dataset.flagged = "false";
+        cell.classList.remove("flagged");
       }
     }
 
