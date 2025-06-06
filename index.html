@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora Básica</title>
+  <title>CALCULADORA</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -104,6 +104,10 @@
   <script>
     function append(val) {
       const display = document.getElementById('display');
+      if (display.value === 'Error') {
+        display.value = '';
+      }
+
       if (val === '±') {
         if (display.value.startsWith('-')) {
           display.value = display.value.slice(1);
