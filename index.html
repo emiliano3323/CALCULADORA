@@ -133,7 +133,6 @@
     function append(val) {
       if (display.value === 'Error') display.value = '';
       display.value += val;
-      console.log('append:', val, 'display:', display.value);
     }
 
     function toggleSign() {
@@ -143,29 +142,23 @@
       } else {
         display.value = '-' + display.value;
       }
-      console.log('toggleSign:', display.value);
     }
 
     function clearDisplay() {
       display.value = '';
-      console.log('clearDisplay');
     }
 
     function backspace() {
       display.value = display.value.slice(0, -1);
-      console.log('backspace:', display.value);
     }
 
     function calculate() {
       try {
-        // Solo números y operadores permitidos
         const sanitized = display.value.replace(/[^0-9+\-*/().]/g, '');
         const result = eval(sanitized);
         display.value = result;
-        console.log('calculate result:', result);
       } catch {
         display.value = 'Error';
-        console.log('calculate error');
       }
     }
   </script>
