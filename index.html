@@ -12,14 +12,14 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      flex-direction: column;
+      position: relative;
     }
     .calculator {
       background: #fff;
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      width: 320px;
+      width: 300px;
     }
     .display {
       width: 100%;
@@ -30,6 +30,7 @@
       padding: 10px;
       border-radius: 10px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
     .buttons {
       display: grid;
@@ -44,7 +45,6 @@
       background-color: #ddd;
       cursor: pointer;
       transition: background 0.2s;
-      user-select: none;
     }
     button:hover {
       background-color: #ccc;
@@ -54,79 +54,64 @@
       background-color: #4CAF50;
       color: white;
     }
-    .minesweeper-btn {
-      margin-top: 15px;
-      background-color: #2196F3;
+    /* Botón pequeño para buscaminas */
+    #btn-buscaminas {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      background-color: #007bff;
       color: white;
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background-color 0.3s;
+      z-index: 100;
     }
-    .minesweeper-btn:hover {
-      background-color: #0b7dda;
+    #btn-buscaminas:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
+  <button id="btn-buscaminas" title="Ir al Buscaminas">Buscaminas</button>
+
   <div class="calculator">
     <input type="text" id="display" class="display" disabled />
     <div class="buttons">
-      <button data-action="toggleSign">±</button>
-      <button data-action="clear">C</button>
-      <button data-action="backspace">⌫</button>
-      <button data-value="/">/</button>
+      <button onclick="toggleSign()">±</button>
+      <button onclick="clearDisplay()">C</button>
+      <button onclick="backspace()">⌫</button>
+      <button onclick="append('/')">/</button>
 
-      <button data-value="7">7</button>
-      <button data-value="8">8</button>
-      <button data-value="9">9</button>
-      <button data-value="*">*</button>
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('*')">*</button>
 
-      <button data-value="4">4</button>
-      <button data-value="5">5</button>
-      <button data-value="6">6</button>
-      <button data-value="-">-</button>
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('-')">-</button>
 
-      <button data-value="1">1</button>
-      <button data-value="2">2</button>
-      <button data-value="3">3</button>
-      <button data-value="+">+</button>
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('+')">+</button>
 
-      <button data-value="0">0</button>
-      <button data-value=".">.</button>
-      <button class="equal" data-action="calculate">=</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button class="equal" onclick="calculate()">=</button>
     </div>
-
-    <button class="minesweeper-btn" id="goMinesweeper">
-      Ir a Buscaminas 🎮
-    </button>
   </div>
 
   <script>
     const display = document.getElementById('display');
-    const buttons = document.querySelectorAll('.buttons button');
-    const btnMinesweeper = document.getElementById('goMinesweeper');
+    const btnBuscaminas = document.getElementById('btn-buscaminas');
 
-    buttons.forEach(button => {
-      button.addEventListener('click', () => {
-        const val = button.getAttribute('data-value');
-        const action = button.getAttribute('data-action');
-
-        if (val) {
-          append(val);
-        } else if (action) {
-          if (action === 'clear') clearDisplay();
-          else if (action === 'backspace') backspace();
-          else if (action === 'calculate') calculate();
-          else if (action === 'toggleSign') toggleSign();
-        }
-      });
-    });
-
-    btnMinesweeper.addEventListener('click', () => {
+    btnBuscaminas.addEventListener('click', () => {
       window.location.href = 'buscaminas.html';
     });
 
@@ -136,10 +121,9 @@
     }
 
     function toggleSign() {
-      if (!display.value) return;
       if (display.value.startsWith('-')) {
         display.value = display.value.slice(1);
-      } else {
+      } else if (display.value.length > 0 && !display.value.startsWith('-')) {
         display.value = '-' + display.value;
       }
     }
@@ -149,14 +133,22 @@
     }
 
     function backspace() {
-      display.value = display.value.slice(0, -1);
+      if (display.value === 'Error') {
+        display.value = '';
+      } else {
+        display.value = display.value.slice(0, -1);
+      }
     }
 
     function calculate() {
       try {
-        const sanitized = display.value.replace(/[^0-9+\-*/().]/g, '');
-        const result = eval(sanitized);
-        display.value = result;
+        // Evalúa sólo si la expresión es segura: números, operadores básicos y punto decimal
+        if (/^[0-9+\-*/.() ]+$/.test(display.value)) {
+          const result = eval(display.value);
+          display.value = result;
+        } else {
+          display.value = 'Error';
+        }
       } catch {
         display.value = 'Error';
       }
